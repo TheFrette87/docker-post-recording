@@ -3,7 +3,7 @@
 Watches for .ts files made by Emby Live TV recordings, converts them to a friendly format, extracts .srt file, add chapters with comchap or remove them with comcut.
 Forked from https://github.com/chacawaca/docker-post-recording to modify for my own needs as I am using the TrueNAS Application for Emby and could not follow along perfectly with the work of https://github.com/BillOatmanWork/Emby.ComSkipper.
 
-Running on a Dell r730xd with a NVidia Quadro P2200 passing through to Emby as well as this plugin for remuxing.
+Running TrueNAS OS Version:25.04.2.6 on a Dell r730xd with a NVidia Quadro P2200 passing through to Emby as well as this plugin for remuxing.
 
 ## Docker Compose (YAML)
 
