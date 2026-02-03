@@ -1,26 +1,41 @@
 # docker-post-recording
 
-Watches for .ts files made by Live TV recordings, convert them to a friendly format, extract .srt file, add chapters with comchap or remove them with comcut.
-Tested with Emby recordings.
+Watches for .ts files made by Emby Live TV recordings, converts them to a friendly format, extracts .srt file, add chapters with comchap or remove them with comcut.
+Forked from https://github.com/chacawaca/docker-post-recording to modify for my own needs as I am using the TrueNAS Application for Emby and could not follow along perfectly with the work of https://github.com/BillOatmanWork/Emby.ComSkipper.
 
-## Example run
+Running on a Dell r730xd with a NVidia Quadro P2200 passing through to Emby as well as this plugin for remuxing.
+
+## Docker Compose (YAML)
 
 ```shell
-docker run -d \
-	--name=post-recording \
-	-v /docker/appdata/post-recording:/config:rw \
-	-v /home/user/videos:/watch:rw \
-	-v /home/user/backup:/backup:rw \
-	-e DELETE_TS=1 \
-	-e SUBTITLES=0 \
-	-e CONVERSION_FORMAT=mkv \
-	-e SOURCE_EXT=ts \
-	-e POST_PROCESS=comchap \
-	-e PUID=99 \
-	-e PGID=100 \
-	-e UMASK=000 \
-	--restart always \
-	chacawaca/post-recording
+version: "3.9"
+
+services:
+  post-recording:
+    container_name: post-recording
+    image: chacawaca/post-recording
+    restart: always
+    environment:
+      PUID: 1000
+      PGID: 1000
+      SOURCE_EXT: ts
+      CONVERSION_FORMAT: mkv
+      # SUBTITLES: 0 = Yes, 1 = No
+      SUBTITLES: 0
+      # DELETE_TS: 0 = Yes, 1 = No
+      DELETE_TS: 1
+      # POST_PROCESS options: comchap or comcut
+      POST_PROCESS: comchap
+    volumes:
+      - /mnt/Tank/docker/data/comskipper:/config:rw
+      - /mnt/Tank/Media/Recorded TV:/watch:rw
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 ```
 
 Where:
@@ -35,35 +50,44 @@ Where:
 - `POST_PROCESS`: option are comchap or comcut. default: comchap
 - `PUID`: ID of the user the application runs as.
 - `PGID`: ID of the group the application runs as.
-- `UMASK`: Mask that controls how file permissions are set for newly created files.
 
 ## Configuration: 
 
-- /scripts/custom.sh **need to be configured** by you, some example are there to help you configure this for your need.
+- /scripts/custom.sh **need to be configured** by you, some examples are there to help you configure this for your need. (The custom-nvidia.sh file provided in the examples folder uses the available NVidia GPU first, and will revert to CPU encoding if necessary. You will have to overwrite custom.sh with this file if desired.)
 - /hooks can be configured to execute custom code
-- /comskip/comskip.ini can be configured too.
+- /comskip/comskip.ini can be configured too. The file I've included seems to do a decent job as-is for my recordings.
+- If you are using the 'comchap' Post Processing Feature, Move comskipper.dll from www.github.com/BillOatmanWork/Emby.ComSkipper/releases zip file into /EmbyConfig/plugins Directory and reboot your Emby server. (I used a Host Path in TrueNAS when configuring Emby here, so I could drop easily from a SMB share)
 
-## Unraid Users
+## Nvidia GPU Use  
+- Using the TrueNAS Nvidia drivers provided with TrueNAS OS Version:25.04.2.6 (Driver Version: 550.142)
+- To enable NVIDIA drivers in TrueNAS Scale, go to Apps > Configuration > Settings and check the option to install NVIDIA drivers. 
+- Include the following into your YAML if you've not already done so:
+```shell
+deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+```
 
-**[Help with Intel](https://forums.unraid.net/topic/77943-guide-plex-hardware-acceleration-using-intel-quick-sync/)**  
-Intel GPU Use  
-Edit your go file to include:  
-modprobe i915, save and reboot, then  
-add --device=/dev/dri to "extra parameters" (switch on advanced view)  
+## Projects used
 
-**[Help with Nvidia](https://forums.unraid.net/topic/77813-plugin-linuxserverio-unraid-nvidia/)**  
-Nvidia GPU Use  
-Using the Unraid Nvidia Plugin to install a version of Unraid with the Nvidia Drivers installed and  
-add --runtime=nvidia to "extra parameters" (switch on advanced view) and  
-copy your GPU UUID to NVIDIA_VISIBLE_DEVICES.  (-e NVIDIA_VISIBLE_DEVICES=GPU-XXXXXXXXXXXXXX)
+www.github.com/chacawaca/docker-post-recording
 
-## projects used
+www.github.com/BillOatmanWork/Emby.ComSkipper
 
 www.github.com/djaydev/docker-recordings-transcoder  
+
 www.github.com/BrettSheleski/comchap  
+
 www.github.com/erikkaashoek/Comskip  
+
 www.github.com/jlesage/docker-handbrake  
+
 www.github.com/ffmpeg/ffmpeg  
+
 www.github.com/CCExtractor/ccextractor  
-www.github.com/linuxserver/docker-baseimage-ubuntu  
+
 www.github.com/jrottenberg/ffmpeg
