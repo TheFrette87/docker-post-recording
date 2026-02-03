@@ -53,7 +53,7 @@ Where:
 
 ## Configuration: 
 
-- /scripts/custom.sh **need to be configured** by you, some examples are there to help you configure this for your need. (The custom-nvidia.sh file provided in the examples folder uses the available NVidia GPU first, and will revert to CPU encoding if necessary. You will have to overwrite custom.sh with this file if desired.)
+- /scripts/custom.sh **need to be configured** by you, some examples are there to help you configure this for your need. (The custom-nvidia-cpu.sh.example file provided in the examples folder uses the available NVidia GPU first, and will revert to CPU encoding if necessary. You will have to overwrite custom.sh with this file if desired.)
 - /hooks can be configured to execute custom code
 - /comskip/comskip.ini can be configured too. The file I've included seems to do a decent job as-is for my recordings.
 - If you are using the 'comchap' Post Processing Feature, Move comskipper.dll from www.github.com/BillOatmanWork/Emby.ComSkipper/releases zip file into /EmbyConfig/plugins Directory and reboot your Emby server. (I used a Host Path in TrueNAS when configuring Emby here, so I could drop easily from a SMB share)
